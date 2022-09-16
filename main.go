@@ -13,8 +13,10 @@ func main() {
 	e := echo.New()
 	userGroup := e.Group("/User")
 	urlGroup := e.Group("/Url", controllers.Auth)
+	alertGroup := e.Group("/Alert", controllers.Auth)
 	routes.HandleUserRoutes(userGroup)
 	routes.HandleUrlRoutes(urlGroup)
+	routes.HandleAlertRoutes(alertGroup)
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
