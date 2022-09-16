@@ -1,15 +1,22 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
+	"github.com/mohammadSorooshfar/golang-http-monitoring/handler"
+	"github.com/mohammadSorooshfar/golang-http-monitoring/store"
 )
 
 func main() {
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-	e.Logger.Fatal(e.Start(":1323"))
+	app := echo.New()
+
+	var userStore store.Auth
+	{
+		// userStore = store.NewAuthInMemory()
+	}
+	ha := handler.Auth{
+		Store: userStore,
+	}
+
+	ha.Register(app.Group(""))
+	app.Logger.Fatal(app.Start(":3000"))
 }
