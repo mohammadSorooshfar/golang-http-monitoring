@@ -120,7 +120,7 @@ func Login(c echo.Context) error {
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 		NotBefore: jwt.NewNumericDate(time.Now()),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		ID:        req.Username,
+		ID:        user.ID.Hex(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
