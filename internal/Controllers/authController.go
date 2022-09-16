@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -48,8 +49,9 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 
 			return echo.ErrUnauthorized
 		}
-
+		fmt.Print(claims)
 		c.Set("name", claims.Subject)
+		c.Set("id", claims.ID)
 
 		return next(c)
 	}
