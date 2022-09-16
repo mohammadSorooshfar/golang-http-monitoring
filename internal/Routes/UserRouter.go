@@ -7,4 +7,6 @@ import (
 
 func HandleUserRoutes(group *echo.Group) {
 	group.POST("/signup", controllers.SignUp)
+	group.POST("/login", controllers.Login)
+
 }

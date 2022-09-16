@@ -9,10 +9,12 @@ import (
 
 	"github.com/go-ozzo/ozzo-validation/is"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	models "github.com/mohammadSorooshfar/golang-http-monitoring/internal/Models"
 	"github.com/mohammadSorooshfar/golang-http-monitoring/internal/database"
 	helpermethods "github.com/mohammadSorooshfar/golang-http-monitoring/internal/helperMethods"
+	"github.com/mohammadSorooshfar/golang-http-monitoring/internal/request"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,6 +23,12 @@ import (
 type User struct {
 	Name    string `json:"name" xml:"name"`
 	Mongoid string `json:"mongoid" xml:"mongoid"`
+	Message string `json:"message"`
+}
+
+type UserToken struct {
+	Name    string `json:"name" xml:"name"`
+	Token   string `json:"token"`
 	Message string `json:"message"`
 }
 
@@ -79,4 +87,54 @@ func SignUp(c echo.Context) error {
 		Message: "created",
 	}
 	return c.JSON(http.StatusCreated, u)
+}
+
+func Login(c echo.Context) error {
+	var req request.Login
+	var user models.User
+	if err := c.Bind(&req); err != nil {
+		fmt.Println(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := req.Validate(); err != nil {
+		fmt.Println(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	err := userCollection.FindOne(ctx, bson.M{"name": req.Name}).Decode(&user)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "username or password is wrong!!!")
+	}
+
+	passwordIsValid, _ := helpermethods.VerifyPassword(req.Password, user.Password)
+	if passwordIsValid != true {
+		return echo.NewHTTPError(http.StatusBadRequest, "username or password is wrong!!!")
+	}
+
+	claims := &jwt.RegisteredClaims{
+		Issuer:    "students-summer-2022",
+		Subject:   req.Name,
+		Audience:  []string{"admin"},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+		NotBefore: jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ID:        req.Name,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+	u := &UserToken{
+		Name:    user.Name,
+		Token:   tokenString,
+		Message: "created",
+	}
+
+	return c.JSON(http.StatusOK, u)
 }
