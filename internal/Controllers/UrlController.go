@@ -52,7 +52,7 @@ func CreateUrl(c echo.Context) error {
 	if validationErr := validation.ValidateStruct(&url,
 		validation.Field(&url.Period,
 			validation.Required, validation.Min(1)),
-		validation.Field(&url.Threshold, is.Digit, validation.Min(5)),
+		validation.Field(&url.Threshold, validation.Min(5)),
 		validation.Field(&url.Link, validation.Required, is.URL),
 	); validationErr != nil {
 		fmt.Println(validationErr)
