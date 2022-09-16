@@ -6,13 +6,13 @@ import (
 )
 
 type Login struct {
-	Name     string `json:"name"`
+	Username string `json:"name"`
 	Password string `json:"password"`
 }
 
 func (req Login) Validate() error {
 	return validation.ValidateStruct(&req,
-		validation.Field(&req.Name,
+		validation.Field(&req.Username,
 			validation.Required, is.Alphanumeric),
 		validation.Field(&req.Password,
 			validation.Required, is.Alphanumeric),

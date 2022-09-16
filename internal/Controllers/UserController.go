@@ -103,7 +103,7 @@ func Login(c echo.Context) error {
 	}
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
-	err := userCollection.FindOne(ctx, bson.M{"name": req.Name}).Decode(&user)
+	err := userCollection.FindOne(ctx, bson.M{"name": req.Username}).Decode(&user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "username or password is wrong!!!")
 	}
@@ -115,12 +115,12 @@ func Login(c echo.Context) error {
 
 	claims := &jwt.RegisteredClaims{
 		Issuer:    "students-summer-2022",
-		Subject:   req.Name,
+		Subject:   req.Username,
 		Audience:  []string{"admin"},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 		NotBefore: jwt.NewNumericDate(time.Now()),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		ID:        req.Name,
+		ID:        req.Username,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
