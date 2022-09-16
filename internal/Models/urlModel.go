@@ -10,5 +10,6 @@ type Url struct {
 	Success   int                `json:"success"`
 	Failed    int                `json:"failed"`
 	User_id   string             `json:"user_id"`
-	Threshold int                `json:"treshold"`
+	Threshold int                `json:"threshold"`
+	Period    int                `json:"period"`
 }
