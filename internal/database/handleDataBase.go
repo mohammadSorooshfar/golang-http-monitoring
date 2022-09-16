@@ -25,7 +25,6 @@ func CreateClient() *mongo.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Disconnect(ctx)
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
@@ -38,6 +37,6 @@ func CreateClient() *mongo.Client {
 	return client
 }
 
-func ConnectToCollection(collectionName string) *mongo.Collection {
-	return Client.Database("cluster0").Collection(collectionName)
+func ConnectToCollection(Client *mongo.Client, collectionName string) *mongo.Collection {
+	return Client.Database("goProject").Collection(collectionName)
 }

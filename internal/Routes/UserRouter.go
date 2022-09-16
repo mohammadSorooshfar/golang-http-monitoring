@@ -1,13 +1,10 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
+	controllers "github.com/mohammadSorooshfar/golang-http-monitoring/internal/Controllers"
 )
 
 func HandleUserRoutes(group *echo.Group) {
-	group.GET("", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, user!")
-	})
+	group.POST("/signup", controllers.SignUp)
 }
