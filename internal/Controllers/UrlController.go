@@ -25,10 +25,14 @@ type UrlJson struct {
 	Url      string `json:"url" xml:"mongoid"`
 	Message  string `json:"message"`
 }
+type GetUrlJson struct {
+	Url     string
+	Failed  int
+	Success int
+}
 
 func CreateUrl(c echo.Context) error {
 	userName := c.Get("name")
-	fmt.Println(userName)
 	var user models.User
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
@@ -40,7 +44,6 @@ func CreateUrl(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	fmt.Println(url.Link)
 	if len(user.Urls) >= 20 {
 		return echo.NewHTTPError(http.StatusBadRequest, "you can add 20 urls only!!!")
 	}
@@ -63,7 +66,11 @@ func CreateUrl(c echo.Context) error {
 	if url.Threshold == 0 {
 		url.Threshold = 5
 	}
-	url.Failed = 0
+	url.Failed = make(map[string]int)
+	url.Success = make(map[string]int)
+	currentTime := time.Now().Format("2006-01-02")
+	url.Failed[currentTime] = 0
+	url.Success[currentTime] = 0
 	user.Urls = append(user.Urls, url)
 	url.ID = primitive.NewObjectID()
 	if _, insertErr := urlCollection.InsertOne(ctx, url); insertErr != nil {
@@ -92,7 +99,7 @@ func GetAllUrls(c echo.Context) error {
 	if err := userCollection.FindOne(ctx, bson.M{"name": userName}).Decode(&user); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusCreated, user.Urls)
+	return c.JSON(http.StatusOK, user.Urls)
 
 }
 func GetUrl(c echo.Context) error {
@@ -116,6 +123,14 @@ func GetUrl(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	idx := slices.IndexFunc(user.Urls, func(c models.Url) bool { return c.Link == url.Link })
-	return c.JSON(http.StatusCreated, user.Urls[idx])
+	if idx == -1 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	currentTime := time.Now().Format("2006-01-02")
+	var result GetUrlJson
+	result.Failed = user.Urls[idx].Failed[currentTime]
+	result.Success = user.Urls[idx].Success[currentTime]
+	result.Url = url.Link
+	return c.JSON(http.StatusOK, result)
 
 }
