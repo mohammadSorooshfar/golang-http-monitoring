@@ -11,9 +11,9 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
-	models "github.com/mohammadSorooshfar/golang-http-monitoring/internal/Models"
 	"github.com/mohammadSorooshfar/golang-http-monitoring/internal/database"
 	helpermethods "github.com/mohammadSorooshfar/golang-http-monitoring/internal/helperMethods"
+	models "github.com/mohammadSorooshfar/golang-http-monitoring/internal/models"
 	"github.com/mohammadSorooshfar/golang-http-monitoring/internal/request"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -58,7 +58,6 @@ func SignUp(c echo.Context) error {
 	); validationErr != nil {
 		fmt.Println(validationErr)
 		return echo.NewHTTPError(http.StatusBadRequest, validationErr.Error())
-
 	}
 	var ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
