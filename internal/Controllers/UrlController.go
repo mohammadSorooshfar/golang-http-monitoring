@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/exp/slices"
 )
 
 var urlCollection *mongo.Collection = database.ConnectToCollection(database.Client, "Urls")
@@ -92,5 +93,29 @@ func GetAllUrls(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusCreated, user.Urls)
+
+}
+func GetUrl(c echo.Context) error {
+	var url models.Url
+
+	if err := c.Bind(&url); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if validationErr := validation.ValidateStruct(&url,
+		validation.Field(&url.Link,
+			validation.Required),
+	); validationErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, validationErr.Error())
+	}
+	userName := c.Get("name")
+	var user models.User
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	if err := userCollection.FindOne(ctx, bson.M{"name": userName}).Decode(&user); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	idx := slices.IndexFunc(user.Urls, func(c models.Url) bool { return c.Link == url.Link })
+	return c.JSON(http.StatusCreated, user.Urls[idx])
 
 }

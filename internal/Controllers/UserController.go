@@ -58,7 +58,6 @@ func SignUp(c echo.Context) error {
 	); validationErr != nil {
 		fmt.Println(validationErr)
 		return echo.NewHTTPError(http.StatusBadRequest, validationErr.Error())
-
 	}
 	var ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
