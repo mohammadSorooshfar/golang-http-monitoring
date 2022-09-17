@@ -93,6 +93,7 @@ func CreateUrl(c echo.Context) error {
 		Url:      url.Link,
 		Message:  "url added",
 	}
+	go RequestToUrl(user.Name, url, len(user.Urls)-1)
 	return c.JSON(http.StatusCreated, u)
 
 }
