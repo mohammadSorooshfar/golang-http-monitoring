@@ -104,6 +104,7 @@ func Login(c echo.Context) error {
 	defer cancel()
 	err := userCollection.FindOne(ctx, bson.M{"name": req.Username}).Decode(&user)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(http.StatusBadRequest, "username or password is wrong!!!")
 	}
 

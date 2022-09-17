@@ -30,6 +30,10 @@ type GetUrlJson struct {
 	Failed  int
 	Success int
 }
+type RequestUrl struct {
+	Link string `json:"link"`
+	Date string `json:"date"`
+}
 
 func CreateUrl(c echo.Context) error {
 	userName := c.Get("name")
@@ -72,11 +76,8 @@ func CreateUrl(c echo.Context) error {
 	currentTime := time.Now().Format("2006-01-02")
 	url.Failed[currentTime] = 0
 	url.Success[currentTime] = 0
-	user.Urls = append(user.Urls, url)
-
 	url.ID = primitive.NewObjectID()
 	user.Urls = append(user.Urls, url)
-
 	if _, insertErr := urlCollection.InsertOne(ctx, url); insertErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, insertErr.Error())
 	}
@@ -107,7 +108,7 @@ func GetAllUrls(c echo.Context) error {
 
 }
 func GetUrl(c echo.Context) error {
-	var url models.Url
+	var url RequestUrl
 
 	if err := c.Bind(&url); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -119,6 +120,27 @@ func GetUrl(c echo.Context) error {
 	); validationErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, validationErr.Error())
 	}
+
+	if _, err := time.Parse("2006-01-02", url.Date); err != nil {
+		fmt.Println("this is ", url.Date)
+		if url.Date != "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "pls enter date in format yyyy-mm-dd")
+		} else {
+			url.Date = time.Now().Format("2006-01-02")
+		}
+
+	}
+
+	a, _ := time.Parse("2006-01-02", url.Date)
+	b, _ := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
+	oneDay := 24 * time.Hour
+	a = a.Truncate(oneDay)
+	b = b.Truncate(oneDay)
+
+	if x := a.After(b); x {
+		return echo.NewHTTPError(http.StatusBadRequest, "pls enter valid date!!")
+	}
+
 	userName := c.Get("name")
 	var user models.User
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -130,17 +152,16 @@ func GetUrl(c echo.Context) error {
 	if idx == -1 {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-	currentTime := time.Now().Format("2006-01-02")
 	var result GetUrlJson
-	if val, ok := user.Urls[idx].Failed[currentTime]; ok {
+	if val, ok := user.Urls[idx].Failed[url.Date]; ok {
 		result.Failed = val
 	} else {
-		result.Failed = 0
+		return echo.NewHTTPError(http.StatusBadRequest, "we do not have record for your wanna date!!!")
 	}
-	if val, ok := user.Urls[idx].Success[currentTime]; ok {
+	if val, ok := user.Urls[idx].Success[url.Date]; ok {
 		result.Success = val
 	} else {
-		result.Success = 0
+		return echo.NewHTTPError(http.StatusBadRequest, "we do not have record for your wanna date!!!")
 	}
 	result.Url = url.Link
 	return c.JSON(http.StatusOK, result)
