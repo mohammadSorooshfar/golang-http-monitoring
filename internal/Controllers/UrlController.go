@@ -132,8 +132,16 @@ func GetUrl(c echo.Context) error {
 	}
 	currentTime := time.Now().Format("2006-01-02")
 	var result GetUrlJson
-	result.Failed = user.Urls[idx].Failed[currentTime]
-	result.Success = user.Urls[idx].Success[currentTime]
+	if val, ok := user.Urls[idx].Failed[currentTime]; ok {
+		result.Failed = val
+	} else {
+		result.Failed = 0
+	}
+	if val, ok := user.Urls[idx].Success[currentTime]; ok {
+		result.Success = val
+	} else {
+		result.Success = 0
+	}
 	result.Url = url.Link
 	return c.JSON(http.StatusOK, result)
 

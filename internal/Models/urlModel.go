@@ -7,9 +7,9 @@ import (
 type Url struct {
 	ID        primitive.ObjectID `bson:"_id"`
 	Link      string             `json:"link"`
-	Success   map[string]int     `json"success"`
-	Failed    map[string]int
-	User_id   string `json:"user_id"`
-	Threshold int    `json:"threshold"`
-	Period    int    `json:"period"`
+	Success   map[string]int     `json:"success"`
+	Failed    map[string]int     `json:"failed"`
+	User_id   string             `json:"user_id"`
+	Threshold int                `json:"threshold"`
+	Period    int                `json:"period"`
 }
