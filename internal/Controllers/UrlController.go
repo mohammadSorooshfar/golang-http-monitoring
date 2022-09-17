@@ -52,7 +52,7 @@ func CreateUrl(c echo.Context) error {
 	if validationErr := validation.ValidateStruct(&url,
 		validation.Field(&url.Period,
 			validation.Required, validation.Min(1)),
-		validation.Field(&url.Threshold, is.Digit, validation.Min(5)),
+		validation.Field(&url.Threshold, validation.Min(5)),
 		validation.Field(&url.Link, validation.Required, is.URL),
 	); validationErr != nil {
 		fmt.Println(validationErr)
@@ -63,8 +63,9 @@ func CreateUrl(c echo.Context) error {
 		url.Threshold = 5
 	}
 	url.Failed = 0
-	user.Urls = append(user.Urls, url)
 	url.ID = primitive.NewObjectID()
+	user.Urls = append(user.Urls, url)
+
 	if _, insertErr := urlCollection.InsertOne(ctx, url); insertErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, insertErr.Error())
 	}
