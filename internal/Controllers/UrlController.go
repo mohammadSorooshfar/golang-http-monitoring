@@ -10,8 +10,8 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/labstack/echo/v4"
-	models "github.com/mohammadSorooshfar/golang-http-monitoring/internal/Models"
 	"github.com/mohammadSorooshfar/golang-http-monitoring/internal/database"
+	models "github.com/mohammadSorooshfar/golang-http-monitoring/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -81,5 +81,16 @@ func CreateUrl(c echo.Context) error {
 		Message:  "url added",
 	}
 	return c.JSON(http.StatusCreated, u)
+
+}
+func GetAllUrls(c echo.Context) error {
+	userName := c.Get("name")
+	var user models.User
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	if err := userCollection.FindOne(ctx, bson.M{"name": userName}).Decode(&user); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusCreated, user.Urls)
 
 }

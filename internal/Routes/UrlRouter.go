@@ -7,4 +7,5 @@ import (
 
 func HandleUrlRoutes(group *echo.Group) {
 	group.POST("/create", controllers.CreateUrl)
+	group.GET("/all", controllers.GetAllUrls)
 }
