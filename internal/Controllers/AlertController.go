@@ -12,7 +12,7 @@ import (
 )
 
 type gettingUrl struct {
-	Url string `query:"url"son:"url"`
+	Url string `query:"url"json:"url"`
 }
 
 func GetAlert(c echo.Context) error {
