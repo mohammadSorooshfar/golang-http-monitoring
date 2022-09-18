@@ -6,5 +6,5 @@ import (
 )
 
 func HandleAlertRoutes(group *echo.Group) {
-	group.GET("/:id", controllers.GetAlert)
+	group.GET("/getAlert", controllers.GetAlert)
 }

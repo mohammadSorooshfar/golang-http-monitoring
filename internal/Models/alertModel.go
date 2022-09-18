@@ -6,8 +6,8 @@ import (
 
 type Alert struct {
 	ID     primitive.ObjectID `bson:"_id"`
-	Url    string             `json:"url"`
-	Name   string             `json:"name"`
+	Url    string             `query:"url"son:"url"`
+	Owner  string             `json:"owner"`
 	Time   string             `json:"time"`
 	UserId primitive.ObjectID `json:"user_id"`
 }

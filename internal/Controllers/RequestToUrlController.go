@@ -25,7 +25,7 @@ func onRequestError(err error, ctx context.Context, userId primitive.ObjectID, u
 		fmt.Println("url : ", url.Link, " alert trigered in time : ", time.Now(), "for user : ", username)
 		var urlAlert models.Alert
 		urlAlert.ID = primitive.NewObjectID()
-		urlAlert.Name = username
+		urlAlert.Owner = username
 		urlAlert.Time = time.Now().Format("2006-01-02 15:04:05.000000")
 		urlAlert.UserId = userId
 		urlAlert.Url = url.Link
