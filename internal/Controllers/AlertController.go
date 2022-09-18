@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/mohammadSorooshfar/golang-http-monitoring/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/exp/slices"
 )
 
 type gettingUrl struct {
@@ -20,12 +22,24 @@ func GetAlert(c echo.Context) error {
 	if err := c.Bind(&getUrl); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	if validationErr := validation.ValidateStruct(&getUrl,
+		validation.Field(&getUrl.Url,
+			validation.Required),
+	); validationErr != nil {
+		fmt.Println(validationErr)
+		return echo.NewHTTPError(http.StatusBadRequest, validationErr.Error())
+	}
 	userName := c.Get("name")
 	var user models.User
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
+
 	if err := userCollection.FindOne(ctx, bson.M{"name": userName}).Decode(&user); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	idx := slices.IndexFunc(user.Urls, func(c models.Url) bool { return c.Link == getUrl.Url })
+	if idx == -1 {
+		return echo.NewHTTPError(http.StatusBadRequest, "this url is not in your saved urls")
 	}
 
 	cursor, err := alertCollection.Find(ctx, bson.M{"url": getUrl.Url, "owner": userName})
