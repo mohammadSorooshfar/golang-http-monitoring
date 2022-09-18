@@ -18,13 +18,13 @@ func RequestToUrl(username string, url models.Url, index int) {
 			fmt.Println("url : ", url.Link, " we have error in finding user in database ", " text of error is : ", err.Error())
 		}
 		defer cancel()
-		resp, err := http.Get(url.Link)
+		client := http.Client{
+			Timeout: 10 * time.Second,
+		}
+		n := time.Now().Format("2006-01-02")
+		resp, err := client.Get(url.Link)
 		if err != nil {
 			fmt.Println("url : ", url.Link, " we have error in request to url in time : ", time.Now(), " text of error is : ", err.Error())
-		}
-		fmt.Printf("url: %s  statuscode: %d\n", url.Link, resp.StatusCode)
-		n := time.Now().Format("2006-01-02")
-		if resp.StatusCode < 200 && resp.StatusCode > 299 {
 			user.Urls[index].Allfailed++
 			if val, ok := user.Urls[index].Failed[n]; ok {
 				user.Urls[index].Failed[n] = val + 1
@@ -33,12 +33,24 @@ func RequestToUrl(username string, url models.Url, index int) {
 				fmt.Println("url : ", url.Link, " alert trigered in time : ", time.Now(), "for user : ", username)
 				user.Urls[index].Allfailed = 0
 			}
-
 		} else {
-			if val, ok := user.Urls[index].Failed[n]; ok {
-				user.Urls[index].Failed[n] = val + user.Urls[index].Failed[n]
+			fmt.Printf("url: %s  statuscode: %d\n", url.Link, resp.StatusCode)
+			if resp.StatusCode < 200 && resp.StatusCode > 299 {
+				user.Urls[index].Allfailed++
+				if val, ok := user.Urls[index].Failed[n]; ok {
+					user.Urls[index].Failed[n] = val + 1
+				}
+				if user.Urls[index].Allfailed == user.Urls[index].Threshold {
+					fmt.Println("url : ", url.Link, " alert trigered in time : ", time.Now(), "for user : ", username)
+					user.Urls[index].Allfailed = 0
+				}
+
+			} else {
+				if val, ok := user.Urls[index].Success[n]; ok {
+					user.Urls[index].Success[n] = val + 1
+				}
+				user.Urls[index].Allsuccess++
 			}
-			user.Urls[index].Allsuccess++
 		}
 		filter := bson.M{"name": username}
 		userCollection.ReplaceOne(ctx, filter, user)
