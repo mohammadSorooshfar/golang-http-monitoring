@@ -19,6 +19,7 @@ type gettingUrl struct {
 
 func GetAlert(c echo.Context) error {
 	var getUrl gettingUrl
+
 	if err := c.Bind(&getUrl); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
