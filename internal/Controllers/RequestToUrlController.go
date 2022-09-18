@@ -35,8 +35,8 @@ func RequestToUrl(username string, url models.Url, index int) {
 			}
 
 		} else {
-			if val, ok := user.Urls[index].Failed[n]; ok {
-				user.Urls[index].Failed[n] = val + user.Urls[index].Failed[n]
+			if val, ok := user.Urls[index].Success[n]; ok {
+				user.Urls[index].Success[n] = val + 1
 			}
 			user.Urls[index].Allsuccess++
 		}
