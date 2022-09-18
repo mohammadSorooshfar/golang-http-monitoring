@@ -9,5 +9,5 @@ type Alert struct {
 	Url    string             `json:"url"`
 	Name   string             `json:"name"`
 	Time   string             `json:"time"`
-	UserId string             `json:"user_id"`
+	UserId primitive.ObjectID `json:"user_id"`
 }
