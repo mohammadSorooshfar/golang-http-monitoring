@@ -37,6 +37,7 @@ type RequestUrl struct {
 
 func CreateUrl(c echo.Context) error {
 	userName := c.Get("name")
+	fmt.Println(userName)
 	var user models.User
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
