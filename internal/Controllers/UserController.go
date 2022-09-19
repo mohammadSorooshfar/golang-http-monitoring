@@ -43,6 +43,9 @@ const (
 var userCollection *mongo.Collection = database.ConnectToCollection(database.Client, "Users")
 
 func SignUp(c echo.Context) error {
+	if userCollection == nil {
+
+	}
 	var user models.User
 
 	if err := c.Bind(&user); err != nil {
