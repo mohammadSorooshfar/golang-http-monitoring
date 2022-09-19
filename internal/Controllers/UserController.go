@@ -62,7 +62,7 @@ func SignUp(c echo.Context) error {
 		fmt.Println(validationErr)
 		return echo.NewHTTPError(http.StatusBadRequest, validationErr.Error())
 	}
-	var ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 	count, err := userCollection.CountDocuments(ctx, bson.M{"name": user.Name})
 	if err != nil {
